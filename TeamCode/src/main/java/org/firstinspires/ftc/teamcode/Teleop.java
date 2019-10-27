@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import  com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -58,20 +59,37 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
 
 @TeleOp(name="Teleop", group="Linear Opmode")
 public class Teleop extends LinearOpMode {
+    Servo grabServo;
+    DcMotor armMotor;
 
     // Declare OpMode members.
     @Override
         public void runOpMode() throws InterruptedException {
             SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
-
+            grabServo = hardwareMap.get(Servo.class,"thehandofnod");
+            armMotor = hardwareMap.get(DcMotor.class,"thestrengthofnod");
+            armMotor.setTargetPosition(armMotor.getCurrentPosition());
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            int currentPosition = 0;
             waitForStart();
 
             while (!isStopRequested()) {
                 drive.setDrivePower(new Pose2d(
-                        -gamepad1.left_stick_y*.5,
-                        -gamepad1.left_stick_x*.5,
-                        -gamepad1.right_stick_x*.03
+                        -gamepad1.left_stick_y,
+                        -gamepad1.left_stick_x,
+                        -gamepad1.right_stick_x*.04
                 ));
+                if(gamepad2.right_bumper){
+                    grabServo.setPosition(1);
+                }else if(gamepad2.left_bumper){
+                    grabServo.setPosition(0);
+                }
+                currentPosition = armMotor.getCurrentPosition();
+                currentPosition += (int)(90*gamepad2.right_stick_y);
+                armMotor.setTargetPosition(currentPosition);
+
+                armMotor.setPower(.5);
+
 
                // drive.update();
 
