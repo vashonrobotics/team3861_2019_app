@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
@@ -12,33 +14,41 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
  */
 @Autonomous(group = "drive")
 public class BlueAuto extends LinearOpMode {
-    @Override
+    Servo grabServo;
+    DcMotor armMotor;
+    Servo baseServo;
     public void runOpMode() throws InterruptedException {
         SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
         Boolean isBrick = true;
+        grabServo = hardwareMap.get(Servo.class,"thehandofnod");
+        armMotor = hardwareMap.get(DcMotor.class,"thestrengthofnod");
+        armMotor.setTargetPosition(armMotor.getCurrentPosition());
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+        int currentPosition = 0;
 
         waitForStart();
         if (isStopRequested()) return;
-        drive.setPoseEstimate(new Pose2d(63,-28,90));
-        followSplineTo(-43,-28,90,drive);
-        if(isBrick){
-            followSplineTo(-43,48,90,drive);
-            followSplineTo(-43,-52,90,drive);
-            followSplineTo(-43,40,90,drive);
-            followSplineTo(-43,0,90,drive);
-        }else{
-            followSplineTo(-43,-36,90,drive);
+        drive.setPoseEstimate(new Pose2d(63,-28,Math.PI/2));
+        followSplineTo(-43,-28,Math.PI/2,drive);
+
+            followSplineTo(-43,48,Math.PI/2,drive);
             if(isBrick){
-                followSplineTo(-43,48,90,drive);
-                followSplineTo(-43,-60,90,drive);
-                followSplineTo(-43,40,90,drive);
-                followSplineTo(-43,0,90,drive);
+            followSplineTo(-43,-52,Math.PI/2,drive);
+            followSplineTo(-43,40,Math.PI/2,drive);
+            followSplineTo(-43,0,Math.PI/2,drive);
+        }else{
+            followSplineTo(-43,-36,Math.PI/2,drive);
+            if(isBrick){
+                followSplineTo(-43,48,Math.PI/2,drive);
+                followSplineTo(-43,-60,Math.PI/2,drive);
+                followSplineTo(-43,40,Math.PI/2,drive);
+                followSplineTo(-43,0,Math.PI/2,drive);
 
             }else{
-                followSplineTo(-43,-44,90,drive);
-                followSplineTo(-43,48,90,drive);
-                followSplineTo(-43,0,90,drive);
+                followSplineTo(-43,-44,Math.PI/2,drive);
+                followSplineTo(-43,48,Math.PI/2,drive);
+                followSplineTo(-43,0,Math.PI/2,drive);
 
             }
         }
@@ -46,5 +56,6 @@ public class BlueAuto extends LinearOpMode {
 
     public void followSplineTo(double x, double y, double heading,SampleMecanumDriveBase drive){
         drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(new Pose2d(x,y,heading)).build());
+        drive.updatePoseEstimate();
     }
 }
