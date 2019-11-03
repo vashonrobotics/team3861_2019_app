@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
  * This is an example of a more complex path to really test the tuning.
  */
 @Autonomous(group = "drive")
-public class BlueAuto extends LinearOpMode {
+public class LeftAuto extends LinearOpMode {
     Servo grabServo;
     DcMotor armMotor;
     Servo baseServo;
@@ -29,7 +29,13 @@ public class BlueAuto extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
-        drive.setPoseEstimate(new Pose2d(63,-28,Math.PI/2));
+
+        drive.setPoseEstimate(new Pose2d(-46,-63,Math.PI/2));
+        drive.turnSync(Math.PI/2);
+        drive.followTrajectorySync(
+                drive.trajectoryBuilder().forward(46).build()
+        );
+        /*
         followSplineTo(-43,-28,Math.PI/2,drive);
 
             followSplineTo(-43,48,Math.PI/2,drive);
@@ -52,6 +58,7 @@ public class BlueAuto extends LinearOpMode {
 
             }
         }
+        */
     }
 
     public void followSplineTo(double x, double y, double heading,SampleMecanumDriveBase drive){

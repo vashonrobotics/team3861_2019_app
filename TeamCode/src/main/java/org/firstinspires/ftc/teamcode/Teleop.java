@@ -61,13 +61,14 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
 public class Teleop extends LinearOpMode {
     Servo grabServo;
     DcMotor armMotor;
-
+    Servo footNod;
     // Declare OpMode members.
     @Override
         public void runOpMode() throws InterruptedException {
             SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
             grabServo = hardwareMap.get(Servo.class,"thehandofnod");
             armMotor = hardwareMap.get(DcMotor.class,"thestrengthofnod");
+            footNod = hardwareMap.get(Servo.class,"thefootofnod");
             armMotor.setTargetPosition(armMotor.getCurrentPosition());
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             int currentPosition = 0;
@@ -80,10 +81,23 @@ public class Teleop extends LinearOpMode {
                         -gamepad1.right_stick_x*.04
                 ));
                 if(gamepad2.right_bumper){
-                    grabServo.setPosition(1);
-                }else if(gamepad2.left_bumper){
-                    grabServo.setPosition(0);
+                    grabServo.setPosition(.5);
                 }
+                if(gamepad2.left_bumper){
+                    grabServo.setPosition(.2);
+                }
+                if(gamepad2.x){
+                    footNod.setPosition(.9);
+                }
+                if(gamepad2.y){
+                    footNod.setPosition(.1);
+                }
+                /*
+                else if(gamepad2.left_bumper){
+                    grabServo.setPosition(.3);
+                }
+                */
+
                 currentPosition = armMotor.getCurrentPosition();
                 currentPosition += (int)(90*gamepad2.right_stick_y);
                 armMotor.setTargetPosition(currentPosition);

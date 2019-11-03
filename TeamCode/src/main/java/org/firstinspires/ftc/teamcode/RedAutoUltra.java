@@ -10,22 +10,29 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
 
 
 @Autonomous(group = "drive")
-public class RedAuto extends LinearOpMode {
+public class RedAutoUltra extends LinearOpMode {
 
     Servo grabServo;
     DcMotor armMotor;
     public void runOpMode() throws InterruptedException {
         SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
         boolean isBrick = false;
-        grabServo = hardwareMap.get(Servo.class,"thehandofnod");
-        armMotor = hardwareMap.get(DcMotor.class,"thestrengthofnod");
+        grabServo = hardwareMap.get(Servo.class, "thehandofnod");
+        armMotor = hardwareMap.get(DcMotor.class, "thestrengthofnod");
         armMotor.setTargetPosition(armMotor.getCurrentPosition());
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         int currentPosition = 0;
         waitForStart();
         if (isStopRequested()) return;
 
-        drive.setPoseEstimate(new Pose2d(63,-28,Math.PI/2));
+
+
+
+        drive.setPoseEstimate(new Pose2d(63,43,-Math.PI/2));
+        drive.followTrajectorySync(
+                drive.trajectoryBuilder().forward(46).build()
+        );
+        /*
         followSplineTo(43,-28,-90,drive);
         if(isBrick){
             followSplineTo(43,48,-Math.PI/2,drive);
@@ -47,11 +54,14 @@ public class RedAuto extends LinearOpMode {
 
             }
         }
-
+        */
     }
 
     public void followSplineTo(double x, double y, double heading,SampleMecanumDriveBase drive){
         drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(new Pose2d(x,y,heading)).build());
         drive.updatePoseEstimate();
     }
+
+
+
 }
