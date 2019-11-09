@@ -40,7 +40,7 @@ public class LeftAutoUltra extends LinearOpMode {
         drive.followTrajectorySync(
                 drive.trajectoryBuilder().back(46).build()
         );
-        footServo.setPosition(.9);
+        footServo.setPosition(.8);
         drive.followTrajectorySync(
                 drive.trajectoryBuilder().strafeLeft(26).build()
         );
