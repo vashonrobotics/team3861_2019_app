@@ -10,15 +10,17 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
 
 
 @Autonomous(group = "drive")
-public class RightAuto extends LinearOpMode {
+public class LeftAutoUltra extends LinearOpMode {
 
     Servo grabServo;
+    Servo footServo;
     DcMotor armMotor;
     public void runOpMode() throws InterruptedException {
         SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
         boolean isBrick = false;
         grabServo = hardwareMap.get(Servo.class, "thehandofnod");
         armMotor = hardwareMap.get(DcMotor.class, "thestrengthofnod");
+        footServo = hardwareMap.get(Servo.class,"thefootofnod");
         armMotor.setTargetPosition(armMotor.getCurrentPosition());
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         int currentPosition = 0;
@@ -28,14 +30,23 @@ public class RightAuto extends LinearOpMode {
 
 
 
-        drive.setPoseEstimate(new Pose2d(-46,63,-Math.PI/2));
+        drive.setPoseEstimate(new Pose2d(-46,-63,Math.PI/2));
         drive.followTrajectorySync(
-                drive.trajectoryBuilder().forward(5).build()
+                drive.trajectoryBuilder().forward(48).build()
         );
-        drive.turnSync(-Math.PI/3);
+        footServo.setPosition(.1);
+        sleep(1000);
+
         drive.followTrajectorySync(
-                drive.trajectoryBuilder().forward(42).build()
+                drive.trajectoryBuilder().back(46).build()
         );
+        footServo.setPosition(.9);
+        drive.followTrajectorySync(
+                drive.trajectoryBuilder().strafeLeft(26).build()
+        );
+
+
+
         /*
         followSplineTo(43,-28,-90,drive);
         if(isBrick){
@@ -68,4 +79,4 @@ public class RightAuto extends LinearOpMode {
 
 
 
-    }
+}
