@@ -3,22 +3,25 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
 
 
 @Autonomous(group = "drive")
-public class RedAutoUltra extends LinearOpMode {
+public class LeftAutoVue extends LinearOpMode {
 
     Servo grabServo;
+    Servo footServo;
     DcMotor armMotor;
     public void runOpMode() throws InterruptedException {
         SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
         boolean isBrick = false;
         grabServo = hardwareMap.get(Servo.class, "thehandofnod");
         armMotor = hardwareMap.get(DcMotor.class, "thestrengthofnod");
+        footServo = hardwareMap.get(Servo.class,"thefootofnod");
         armMotor.setTargetPosition(armMotor.getCurrentPosition());
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         int currentPosition = 0;
@@ -28,10 +31,21 @@ public class RedAutoUltra extends LinearOpMode {
 
 
 
-        drive.setPoseEstimate(new Pose2d(63,43,-Math.PI/2));
+        drive.setPoseEstimate(new Pose2d(-46,-63,Math.PI/2));
         drive.followTrajectorySync(
-                drive.trajectoryBuilder().forward(46).build()
+                drive.trajectoryBuilder().forward(48).build()
         );
+        sleep(1000);
+
+        drive.followTrajectorySync(
+                drive.trajectoryBuilder().back(46).build()
+        );
+        drive.followTrajectorySync(
+                drive.trajectoryBuilder().strafeLeft(26).build()
+        );
+
+
+
         /*
         followSplineTo(43,-28,-90,drive);
         if(isBrick){

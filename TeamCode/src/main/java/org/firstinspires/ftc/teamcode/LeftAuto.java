@@ -31,9 +31,9 @@ public class LeftAuto extends LinearOpMode {
         if (isStopRequested()) return;
 
         drive.setPoseEstimate(new Pose2d(-46,-63,Math.PI/2));
-        drive.turnSync(Math.PI/2);
+        drive.turnSync(Math.PI/3);
         drive.followTrajectorySync(
-                drive.trajectoryBuilder().forward(46).build()
+                drive.trajectoryBuilder().forward(42).build()
         );
         /*
         followSplineTo(-43,-28,Math.PI/2,drive);
