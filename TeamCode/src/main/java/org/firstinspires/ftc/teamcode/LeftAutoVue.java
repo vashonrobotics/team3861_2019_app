@@ -114,11 +114,3 @@ public class LeftAutoVue extends LinearOpMode {
             }
         }
     }
-
-
-
-
-
-
-
-
