@@ -111,9 +111,8 @@ public class SkystoneTracker {
         }
     }
 
-    public boolean isVisible()
-    {
-        return listener.isVisible();
+    public boolean isVisible() {
+      return listener.isVisible();
     }
 
     private void setupVuforia()
