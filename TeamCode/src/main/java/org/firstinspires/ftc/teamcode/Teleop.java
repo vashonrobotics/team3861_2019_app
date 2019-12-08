@@ -106,7 +106,7 @@ public class Teleop extends LinearOpMode {
                 currentPosition += (int)(90*gamepad2.right_stick_y);
                 armMotor.setTargetPosition(currentPosition);
 
-                armMotor.setPower(.5);
+                armMotor.setPower(1);
 
 
                // drive.update();

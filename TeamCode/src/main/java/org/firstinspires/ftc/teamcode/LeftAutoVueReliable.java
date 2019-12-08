@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
 
 
 @Autonomous(group = "drive")
-public class LeftAutoVue extends LinearOpMode {
+public class LeftAutoVueReliable extends LinearOpMode {
 
     Servo grabServo;
     Servo footServoOne;
@@ -62,16 +62,14 @@ public class LeftAutoVue extends LinearOpMode {
                 sleep(1000);
                 grabServo.setPosition(.5);
                 drive.followTrajectorySync(
-                        drive.trajectoryBuilder().back(3).build()
+                        drive.trajectoryBuilder().back(10).build()
                 );
                 armMotor.setTargetPosition(2200);
                 armMotor.setPower(-1);
-                sleep(2000);
-                drive.turnSync(Math.PI/2);
                 drive.followTrajectorySync(
-                        drive.trajectoryBuilder().back(76).build()
+                        drive.trajectoryBuilder().strafeRight(76).build()
                 );
-                drive.turnSync(-Math.PI/2);
+
 
             } else {
                 drive.followTrajectorySync(
@@ -88,16 +86,13 @@ public class LeftAutoVue extends LinearOpMode {
                     drive.followTrajectorySync(drive.trajectoryBuilder().forward(2).build());
                     grabServo.setPosition(.5);
                     drive.followTrajectorySync(
-                            drive.trajectoryBuilder().back(3).build()
+                            drive.trajectoryBuilder().back(10).build()
                     );
                     armMotor.setTargetPosition(2200);
                     armMotor.setPower(-1);
-                    sleep(2000);
-                    drive.turnSync(Math.PI/2);
                     drive.followTrajectorySync(
-                            drive.trajectoryBuilder().back(84).build()
+                            drive.trajectoryBuilder().strafeRight(84).build()
                     );
-                    drive.turnSync(-Math.PI/2);
                 } else {
                     drive.followTrajectorySync(
                             drive.trajectoryBuilder().strafeLeft(8).build()
@@ -108,20 +103,19 @@ public class LeftAutoVue extends LinearOpMode {
                     drive.followTrajectorySync(drive.trajectoryBuilder().forward(2).build());
                     grabServo.setPosition(.5);
                     drive.followTrajectorySync(
-                            drive.trajectoryBuilder().back(3).build()
+                            drive.trajectoryBuilder().back(10).build()
                     );
                     armMotor.setTargetPosition(2200);
                     armMotor.setPower(-1);
-                    sleep(2000);
-                    drive.turnSync(Math.PI/2);
+
                     drive.followTrajectorySync(
-                            drive.trajectoryBuilder().back(92).build()
+                            drive.trajectoryBuilder().strafeRight(92).build()
                     );
-                    drive.turnSync(-Math.PI/2);
+
 
                 }
                 drive.followTrajectorySync(
-                        drive.trajectoryBuilder().forward(7).build()
+                        drive.trajectoryBuilder().forward(8).build()
                 );
                 footServoTwo.setPosition(.9);
                 footServoOne.setPosition(.1);

@@ -123,7 +123,7 @@ public class SkystoneTracker {
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         parameters.useExtendedTracking = false;
         vuforiaLocalizer = ClassFactory.getInstance().createVuforia(parameters);
-        CameraDevice.getInstance().setFlashTorchMode( true );
+        //CameraDevice.getInstance().setFlashTorchMode( true );
 
         // These are the vision targets that we want to use
         // The string needs to be the name of the appropriate .xml file in the assets folder
