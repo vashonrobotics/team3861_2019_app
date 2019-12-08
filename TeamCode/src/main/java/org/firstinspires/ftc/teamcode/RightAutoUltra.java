@@ -3,14 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
 
 
 @Autonomous(group = "drive")
-public class LeftAutoUltra extends LinearOpMode {
+public class RightAutoUltra extends LinearOpMode {
 
     Servo grabServo;
     Servo footServoOne;
@@ -42,7 +43,7 @@ public class LeftAutoUltra extends LinearOpMode {
         sleep(1500);
         drive.followTrajectorySync(drive.trajectoryBuilder().back(22).build());
        // drive.turnSync(-Math.PI/2);
-        drive.turnSync(-Math.PI+.1);
+        drive.turnSync(Math.PI+.1);
         drive.followTrajectorySync(drive.trajectoryBuilder().forward(26).build());
         //drive.followTrajectorySync(drive.trajectoryBuilder().strafeRight(24).build());
         footServoTwo.setPosition(.9);

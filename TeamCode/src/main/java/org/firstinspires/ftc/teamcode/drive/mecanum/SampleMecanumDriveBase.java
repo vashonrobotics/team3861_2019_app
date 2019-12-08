@@ -186,7 +186,9 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
             }
         }
 
-        dashboard.sendTelemetryPacket(packet);
+        if(dashboard != null) {
+            dashboard.sendTelemetryPacket(packet);
+        }
     }
 
     public void waitForIdle() {
