@@ -72,7 +72,7 @@ public class Teleop extends LinearOpMode {
         footServoOne = hardwareMap.get(Servo.class,"footOfNodOne");
         footServoTwo = hardwareMap.get(Servo.class,"theFootOfNodTwo" );
             armMotor.setTargetPosition(armMotor.getCurrentPosition());
-            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             int currentPosition = 0;
             waitForStart();
 
@@ -80,8 +80,7 @@ public class Teleop extends LinearOpMode {
                 drive.setDrivePower(new Pose2d(
                         -gamepad1.left_stick_y,
                         -gamepad1.left_stick_x,
-                        -gamepad1.right_stick_x*.04
-                ));
+                        -gamepad1.right_stick_x));
                 if(gamepad2.right_bumper){
                     grabServo.setPosition(.5);
                 }
@@ -102,11 +101,11 @@ public class Teleop extends LinearOpMode {
                 }
                 */
 
-                currentPosition = armMotor.getCurrentPosition();
-                currentPosition += (int)(90*gamepad2.right_stick_y);
-                armMotor.setTargetPosition(currentPosition);
+                //currentPosition = armMotor.getCurrentPosition();
+               // currentPosition += (int)(90*gamepad2.right_stick_y);
+                //armMotor.setTargetPosition(currentPosition);
 
-                armMotor.setPower(1);
+                armMotor.setPower(gamepad2.right_stick_y);
 
 
                // drive.update();
