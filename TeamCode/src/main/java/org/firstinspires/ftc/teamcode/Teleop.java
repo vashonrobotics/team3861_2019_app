@@ -36,7 +36,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import  com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -49,73 +51,106 @@ import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
  * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
  * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
  * class is instantiated on the Robot Controller and executed.
- *
+ * <p>
  * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
  * It includes all the skeletal structure that all linear OpModes contain.
- *
+ * <p>
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Teleop", group="Linear Opmode")
+@TeleOp(name = "Teleop", group = "Linear Opmode")
 public class Teleop extends LinearOpMode {
+    private static final double ROTATION_SCALE = -0.3;
+    private static final double VELOCITY_SCALE = -0.9;
+    private static final double ARM_SCALE = 0.45;
+
     Servo grabServo;
-    DcMotor armMotor;
+    DcMotorEx armMotor;
     Servo footServoOne;
     Servo footServoTwo;
+
     // Declare OpMode members.
     @Override
-        public void runOpMode() throws InterruptedException {
-            SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
-            grabServo = hardwareMap.get(Servo.class,"thehandofnod");
-            armMotor = hardwareMap.get(DcMotor.class,"thestrengthofnod");
-        footServoOne = hardwareMap.get(Servo.class,"footOfNodOne");
-        footServoTwo = hardwareMap.get(Servo.class,"theFootOfNodTwo" );
-            armMotor.setTargetPosition(armMotor.getCurrentPosition());
-            armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            int currentPosition = 0;
-            waitForStart();
+    public void runOpMode() throws InterruptedException {
+        SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
+        grabServo = hardwareMap.get(Servo.class, "thehandofnod");
+        armMotor = hardwareMap.get(DcMotorEx.class, "thestrengthofnod");
+        footServoOne = hardwareMap.get(Servo.class, "footOfNodOne");
+        footServoTwo = hardwareMap.get(Servo.class, "theFootOfNodTwo");
+        armMotor.setTargetPosition(armMotor.getCurrentPosition());
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        armMotor.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
+//                20, 5, 8, 4
+//        ));
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        int currentPosition = 0;
+        waitForStart();
 
-            while (!isStopRequested()) {
-                drive.setDrivePower(new Pose2d(
-                        -gamepad1.left_stick_y,
-                        -gamepad1.left_stick_x,
-                        -gamepad1.right_stick_x));
-                if(gamepad2.right_bumper){
-                    grabServo.setPosition(.5);
-                }
-                if(gamepad2.left_bumper){
-                    grabServo.setPosition(.2);
-                }
-                if(gamepad2.x){
-                    footServoOne.setPosition(.9);
-                    footServoTwo.setPosition(.1);
-                }
-                if(gamepad2.y){
-                    footServoTwo.setPosition(.9);
-                    footServoOne.setPosition(.1);
-                }
+        while (!isStopRequested()) {
+            double velocityScale = VELOCITY_SCALE;
+            double rotationScale = ROTATION_SCALE;
+            double armScale = ARM_SCALE;
+
+            float triggerValue = gamepad1.right_trigger;
+            telemetry.addLine(String.format("trigger value = %f", triggerValue));
+            rotationScale *= Math.min(1.05 - triggerValue, 1.0);
+            velocityScale *= Math.min(1.25 - triggerValue, 1.0);
+
+            if (gamepad2.right_trigger > 0.5) {
+                armScale *= .5;
+            }
+
+            telemetry.addLine(String.format("rScale = %f, vScale = %f", rotationScale, velocityScale));
+            drive.setDrivePower(new Pose2d(
+                    velocityScale * gamepad1.left_stick_y,
+                    velocityScale * gamepad1.left_stick_x,
+                    rotationScale * gamepad1.right_stick_x));
+
+            if (gamepad2.right_bumper) {
+                grabServo.setPosition(.5);
+            }
+            if (gamepad2.left_bumper) {
+                grabServo.setPosition(.2);
+            }
+            if (gamepad2.x) {
+                footServoOne.setPosition(.9);
+                footServoTwo.setPosition(.1);
+            }
+            if (gamepad2.y) {
+                footServoTwo.setPosition(.9);
+                footServoOne.setPosition(.1);
+            }
                 /*
                 else if(gamepad2.left_bumper){
                     grabServo.setPosition(.3);
                 }
                 */
 
-                //currentPosition = armMotor.getCurrentPosition();
-               // currentPosition += (int)(90*gamepad2.right_stick_y);
-                //armMotor.setTargetPosition(currentPosition);
+            //currentPosition = armMotor.getCurrentPosition();
+            // currentPosition += (int)(90*gamepad2.right_stick_y);
+            //armMotor.setTargetPosition(currentPosition);
 
-                armMotor.setPower(gamepad2.right_stick_y);
-
-
-               // drive.update();
-
-                Pose2d poseEstimate = drive.getPoseEstimate();
-                telemetry.addData("x", poseEstimate.getX());
-                telemetry.addData("y", poseEstimate.getY());
-                telemetry.addData("heading", poseEstimate.getHeading());
-                telemetry.update();
+            float armPower = gamepad2.right_stick_y;
+            if (Math.abs(armPower) < 0.01) {
+                armPower = 0;
             }
+
+            if (armPower > 0) {
+                armPower *= 0.5;
+            }
+
+            armMotor.setPower(armScale * armPower);
+
+
+            // drive.update();
+
+            Pose2d poseEstimate = drive.getPoseEstimate();
+            telemetry.addData("x", poseEstimate.getX());
+            telemetry.addData("y", poseEstimate.getY());
+            telemetry.addData("heading", poseEstimate.getHeading());
+            telemetry.update();
         }
     }
+}
 

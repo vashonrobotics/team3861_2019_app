@@ -20,7 +20,7 @@ public class DriveConstants {
      * adjust them in the dashboard; **config variable changes don't persist between app restarts**.
      */
     private static final MotorConfigurationType MOTOR_CONFIG =
-            MotorConfigurationType.getMotorType(NeveRest40Gearmotor.class);
+            MotorConfigurationType.getMotorType(NeveRest20Gearmotor.class);
     private static final double TICKS_PER_REV = MOTOR_CONFIG.getTicksPerRev();
 
     /*
@@ -33,7 +33,7 @@ public class DriveConstants {
      */
     public static double WHEEL_RADIUS = 1.96;
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 12.5;
+    public static double TRACK_WIDTH = 15.6;
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -43,7 +43,7 @@ public class DriveConstants {
      */
     public static double kV = 1.0 / rpmToVelocity(getMaxRpm());
     public static double kA = 0;
-    public static double kStatic = 0.1;
+    public static double kStatic = 0;
 
     /*
      * These values are used to generate the trajectories for you robot. To ensure proper operation,
@@ -69,5 +69,16 @@ public class DriveConstants {
 
     public static double getMaxRpm() {
         return MOTOR_CONFIG.getMaxRPM();
+    }
+
+
+    public static double getTicksPerSec() {
+        // note: MotorConfigurationType#getAchieveableMaxTicksPerSecond() isn't quite what we want
+        return (MOTOR_CONFIG.getMaxRPM() * MOTOR_CONFIG.getTicksPerRev() / 60.0);
+    }
+
+    public static double getMotorVelocityF() {
+        // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx
+        return 32767 / getTicksPerSec();
     }
 }

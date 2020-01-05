@@ -36,35 +36,36 @@ public class RightAutoVueReliable extends LinearOpMode {
 
         waitForStart();
         if (isStopRequested()) return;
-        drive.setPoseEstimate(new Pose2d(-46, -63, Math.PI / 2));
+        drive.setPoseEstimate(new Pose2d(-46, -63, 0));
+        footServoTwo.setPosition(.9);
+        footServoOne.setPosition(.1);
         vue.update();
-        sleep(250);
         grabServo.setPosition(.1);
         vue.update();
         drive.followTrajectorySync(
                 drive.trajectoryBuilder().forward(9).build());
         vue.update();
-        sleep(1500);
+        sleep(500);
         drive.followTrajectorySync(
                 drive.trajectoryBuilder().forward(3).build());
 
         vue.update();
-        sleep(350);
         vue.update();
 
             if (vue.isVisible()) {
                 armMotor.setTargetPosition(2800);
                 armMotor.setPower(.7);
                 drive.followTrajectorySync(drive.trajectoryBuilder().forward(3).build());
-                sleep(1000);
+                sleep(1500);
                 grabServo.setPosition(.5);
                 drive.followTrajectorySync(
                         drive.trajectoryBuilder().back(10).build()
                 );
-                armMotor.setTargetPosition(2200);
+                armMotor.setTargetPosition(2400);
                 armMotor.setPower(-1);
+                drive.turnSync(-Math.PI/2-.1);
                 drive.followTrajectorySync(
-                        drive.trajectoryBuilder().strafeLeft(78).build()
+                        drive.trajectoryBuilder().back(78).build()
                 );
 
             } else {
@@ -72,23 +73,20 @@ public class RightAutoVueReliable extends LinearOpMode {
                         drive.trajectoryBuilder().strafeRight(8).build()
                 );
                 vue.update();
-                sleep(250);
-                vue.update();
-                sleep(500);
-                vue.update();
                 if (vue.isVisible()) {
                     armMotor.setTargetPosition(2800);
                     armMotor.setPower(.7);
-                    sleep(3500);
-                    drive.followTrajectorySync(drive.trajectoryBuilder().forward(2).build());
+                    sleep(1500);
+                    drive.followTrajectorySync(drive.trajectoryBuilder().forward(3).build());
                     grabServo.setPosition(.5);
                     drive.followTrajectorySync(
                             drive.trajectoryBuilder().back(10).build()
                     );
-                    armMotor.setTargetPosition(2200);
+                    armMotor.setTargetPosition(2400);
                     armMotor.setPower(-1);
+                    drive.turnSync(-Math.PI/2-.1);
                     drive.followTrajectorySync(
-                            drive.trajectoryBuilder().strafeLeft(84).build()
+                            drive.trajectoryBuilder().back(84).build()
                     );
                 } else {
                     drive.followTrajectorySync(
@@ -96,25 +94,26 @@ public class RightAutoVueReliable extends LinearOpMode {
                     );
                     armMotor.setTargetPosition(2800);
                     armMotor.setPower(.7);
-                    sleep(3500);
-                    drive.followTrajectorySync(drive.trajectoryBuilder().forward(2).build());
+                    sleep(1500);
+                    drive.followTrajectorySync(drive.trajectoryBuilder().forward(3.5).build());
                     grabServo.setPosition(.5);
                     drive.followTrajectorySync(
                             drive.trajectoryBuilder().back(10).build()
                     );
-                    armMotor.setTargetPosition(2200);
+                    armMotor.setTargetPosition(2400);
                     armMotor.setPower(-1);
+                    drive.turnSync(-Math.PI/2-.1);
                     drive.followTrajectorySync(
-                            drive.trajectoryBuilder().strafeLeft(90).build()
+                            drive.trajectoryBuilder().back(90).build()
                     );
 
 
                 }
+                drive.turnSync(Math.PI/2);
                 drive.followTrajectorySync(
-                        drive.trajectoryBuilder().forward(8).build()
+                        drive.trajectoryBuilder().forward(27).build()
                 );
-                footServoTwo.setPosition(.9);
-                footServoOne.setPosition(.1);
+
             
 
                 footServoOne.setPosition(.9);
