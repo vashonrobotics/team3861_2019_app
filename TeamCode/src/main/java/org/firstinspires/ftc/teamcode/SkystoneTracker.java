@@ -1,164 +1,235 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.vuforia.CameraDevice;
-import com.vuforia.HINT;
-import com.vuforia.Vuforia;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
+import org.openftc.easyopencv.OpenCvPipeline;
 
-import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
+import java.util.ArrayList;
+import java.util.List;
 
+
+/**
+ * Created by maryjaneb  on 11/13/2016.
+ * <p>
+ * nerverest ticks
+ * 60 1680
+ * 40 1120
+ * 20 560
+ * <p>
+ * monitor: 640 x 480
+ * YES
+ */
+//@Disabled//comment out this line before using
 public class SkystoneTracker {
-    // We will define some constants and conversions here
-    private static final float mmPerInch        = 25.4f;
+    private ElapsedTime runtime = new ElapsedTime();
 
-    // Constant for Stone Target
-    private static final float stoneZ = 2.00f * mmPerInch;
+    //0 means skystone, 1 means yellow stone
+    //-1 for debug, but we can keep it like this because if it works, it should change to either 0 or 255
+    private static int valMid = -1;
+    private static int valLeft = -1;
+    private static int valRight = -1;
 
-    // Variables to be used for later
-    private VuforiaLocalizer vuforiaLocalizer;
-    private VuforiaLocalizer.Parameters parameters;
-    private VuforiaTrackables visionTargets;
-    private VuforiaTrackable target;
-    private VuforiaTrackableDefaultListener listener;
+    private static float rectHeight = .6f / 8f;
+    private static float rectWidth = 1.5f / 8f;
 
-    private OpenGLMatrix lastKnownLocation;
+    private static float offsetX = 0f / 8f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
+    private static float offsetY = 0f / 8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
 
-    private boolean smooth = false;
-    private ExponentialMovingAverage xSmooth;
-    private ExponentialMovingAverage ySmooth;
-    private ExponentialMovingAverage zSmooth;
-    private ExponentialMovingAverage angleSmooth;
+    private static float[] midPos = {4f / 8f + offsetX, 4f / 8f + offsetY};//0 = col, 1 = row
+    private static float[] leftPos = {2f / 8f + offsetX, 4f / 8f + offsetY};
+    private static float[] rightPos = {6f / 8f + offsetX, 4f / 8f + offsetY};
+    //moves all rectangles right or left by amount. units are in ratio to monitor
 
-    private static final String VUFORIA_KEY =
-            "Aau7tAP/////AAABmYcV2J3v00uhvod2qwfSvl11CHWQOos0Vv7o/4cXjJWODdYrxnH3ryRnpGm53SFGYFb7uC7X0ZYswprbG36uSQ6X0ltOW44hgnHt/bHy5Hj+cQOrUZvc921W6rGqdznkVsW2Rs14P8as7MAjg3zcXmRknLqtz2sys7vY84HdvhSVhkz2iGWlG4eZ18tf8gCmcJToytbQ8xUb0dpshqI5DS3xcWOfEdQjdhJFJzMg/4a1T3y0iI+rxg5gOG2ETORrsYiAp1teDQPrkJoGFSCrrTTDmJfrlhlzjE6eaw7u8HqsKKTnWqhQQZDEKVIWYgCfN8I+xUoq0fcAKEfR4go/+3Pk8C4cLASPlYbFVPI6vPLC";
+    private final int rows = 640;
+    private final int cols = 480;
 
-    public SkystoneTracker(double alpha) {
-        this.xSmooth = new ExponentialMovingAverage(alpha);
-        this.ySmooth = new ExponentialMovingAverage(alpha);
-        this.zSmooth = new ExponentialMovingAverage(alpha);
-        this.angleSmooth = new ExponentialMovingAverage(alpha);
+    OpenCvCamera phoneCam;
+
+
+    public void init(HardwareMap hardwareMap) throws InterruptedException {
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        phoneCam.openCameraDevice();//open camera
+        phoneCam.setPipeline(new StageSwitchingPipeline());//different stages
+        phoneCam.startStreaming(rows, cols, OpenCvCameraRotation.UPRIGHT);//display on RC
+        //width, height
+        //width = height in this case, because camera is in portrait mode.
+
+
     }
 
-    public void init()
-    {
-        setupVuforia();
-        visionTargets.activate();
-    }
 
+    //detection pipeline
+    static class StageSwitchingPipeline extends OpenCvPipeline {
+        Mat yCbCrChan2Mat = new Mat();
+        Mat thresholdMat = new Mat();
+        Mat all = new Mat();
+        List<MatOfPoint> contoursList = new ArrayList<>();
 
-    public Double getAngle() {
-        if(lastKnownLocation != null) {
-            return angleSmooth.getCurrent();
+        enum Stage {//color difference. greyscale
+            detection,//includes outlines
+            THRESHOLD,//b&w
+            RAW_IMAGE,//displays raw view
         }
 
-        return null;
-    }
+        private Stage stageToRenderToViewport = Stage.detection;
+        private Stage[] stages = Stage.values();
 
-    public Double getX() {
-        if(lastKnownLocation != null) {
-            return xSmooth.getCurrent();
+        @Override
+        public void onViewportTapped() {
+            /*
+             * Note that this method is invoked from the UI thread
+             * so whatever we do here, we must do quickly.
+             */
+
+            int currentStageNum = stageToRenderToViewport.ordinal();
+
+            int nextStageNum = currentStageNum + 1;
+
+            if (nextStageNum >= stages.length) {
+                nextStageNum = 0;
+            }
+
+            stageToRenderToViewport = stages[nextStageNum];
         }
 
-        return null;
-    }
+        @Override
+        public Mat processFrame(Mat input) {
+            contoursList.clear();
+            /*
+             * This pipeline finds the contours of yellow blobs such as the Gold Mineral
+             * from the Rover Ruckus game.
+             */
 
-    public Double getY() {
-        if(lastKnownLocation != null) {
-            return ySmooth.getCurrent();
-        }
+            //color diff cb.
+            //lower cb = more blue = skystone = white
+            //higher cb = less blue = yellow stone = grey
+            Imgproc.cvtColor(input, yCbCrChan2Mat, Imgproc.COLOR_RGB2YCrCb);//converts rgb to ycrcb
+            Core.extractChannel(yCbCrChan2Mat, yCbCrChan2Mat, 2);//takes cb difference and stores
 
-        return null;
-    }
+            //b&w
+            Imgproc.threshold(yCbCrChan2Mat, thresholdMat, 102, 255, Imgproc.THRESH_BINARY_INV);
 
-    public Double getZ() {
-        if(lastKnownLocation != null) {
-            return zSmooth.getCurrent();
-        }
-
-        return null;
-    }
+            //outline/contour
+            Imgproc.findContours(thresholdMat, contoursList, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+            yCbCrChan2Mat.copyTo(all);//copies mat object
+            //Imgproc.drawContours(all, contoursList, -1, new Scalar(255, 0, 0), 3, 8);//draws blue contours
 
 
-    public void update()
-    {
-        if(listener.isVisible()) {
-            // Ask the listener for the latest information on where the robot is
-            OpenGLMatrix latestLocation = listener.getUpdatedRobotLocation();
-            if(latestLocation != null) {
-                lastKnownLocation = latestLocation;
+            //get values from frame
+            double[] pixMid = thresholdMat.get((int) (input.rows() * midPos[1]), (int) (input.cols() * midPos[0]));//gets value at circle
+            valMid = (int) pixMid[0];
 
-                VectorF coords = lastKnownLocation.getTranslation();
-                xSmooth.update(coords.get(0) / mmPerInch);
-                ySmooth.update(coords.get(1) / mmPerInch);
-                zSmooth.update(coords.get(2) / mmPerInch);
-                float angle = Orientation.getOrientation(lastKnownLocation, AxesReference.EXTRINSIC,
-                        AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-                angleSmooth.update(angle);
+            double[] pixLeft = thresholdMat.get((int) (input.rows() * leftPos[1]), (int) (input.cols() * leftPos[0]));//gets value at circle
+            valLeft = (int) pixLeft[0];
+
+            double[] pixRight = thresholdMat.get((int) (input.rows() * rightPos[1]), (int) (input.cols() * rightPos[0]));//gets value at circle
+            valRight = (int) pixRight[0];
+
+            //create three points
+            Point pointMid = new Point((int) (input.cols() * midPos[0]), (int) (input.rows() * midPos[1]));
+            Point pointLeft = new Point((int) (input.cols() * leftPos[0]), (int) (input.rows() * leftPos[1]));
+            Point pointRight = new Point((int) (input.cols() * rightPos[0]), (int) (input.rows() * rightPos[1]));
+
+            //draw circles on those points
+            Imgproc.circle(all, pointMid, 5, new Scalar(255, 0, 0), 1);//draws circle
+            Imgproc.circle(all, pointLeft, 5, new Scalar(255, 0, 0), 1);//draws circle
+            Imgproc.circle(all, pointRight, 5, new Scalar(255, 0, 0), 1);//draws circle
+
+            //draw 3 rectangles
+            Imgproc.rectangle(//1-3
+                    all,
+                    new Point(
+                            input.cols() * (leftPos[0] - rectWidth / 2),
+                            input.rows() * (leftPos[1] - rectHeight / 2)),
+                    new Point(
+                            input.cols() * (leftPos[0] + rectWidth / 2),
+                            input.rows() * (leftPos[1] + rectHeight / 2)),
+                    new Scalar(0, 255, 0), 3);
+            Imgproc.rectangle(//3-5
+                    all,
+                    new Point(
+                            input.cols() * (midPos[0] - rectWidth / 2),
+                            input.rows() * (midPos[1] - rectHeight / 2)),
+                    new Point(
+                            input.cols() * (midPos[0] + rectWidth / 2),
+                            input.rows() * (midPos[1] + rectHeight / 2)),
+                    new Scalar(0, 255, 0), 3);
+            Imgproc.rectangle(//5-7
+                    all,
+                    new Point(
+                            input.cols() * (rightPos[0] - rectWidth / 2),
+                            input.rows() * (rightPos[1] - rectHeight / 2)),
+                    new Point(
+                            input.cols() * (rightPos[0] + rectWidth / 2),
+                            input.rows() * (rightPos[1] + rectHeight / 2)),
+                    new Scalar(0, 255, 0), 3);
+
+            switch (stageToRenderToViewport) {
+                case THRESHOLD: {
+                    return thresholdMat;
+                }
+
+                case detection: {
+                    return all;
+                }
+
+                case RAW_IMAGE: {
+                    return input;
+                }
+
+                default: {
+                    return input;
+                }
             }
         }
+
     }
 
     public boolean isVisible() {
-      return listener.isVisible();
+        if (valMid == 0 && (valRight == 255 || valLeft == 255)) {
+            return true;
+        }
+        return false;
+    }
+    public String getPath(){
+        if(valMid==0&&valRight==255){
+            return "L";
+        }else if(valMid==255&&valRight==0){
+            return "C";
+        }else{
+            return "R";
+        }
     }
 
-    private void setupVuforia()
-    {
-        // Setup parameters to create localizer
-        parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId); // To remove the camera view from the screen, remove the R.id.cameraMonitorViewId
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        parameters.useExtendedTracking = false;
-        vuforiaLocalizer = ClassFactory.getInstance().createVuforia(parameters);
-        //CameraDevice.getInstance().setFlashTorchMode( true );
-
-        // These are the vision targets that we want to use
-        // The string needs to be the name of the appropriate .xml file in the assets folder
-        visionTargets = vuforiaLocalizer.loadTrackablesFromAsset("Skystone");
-        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
-
-        // Setup the target to be tracked
-        target = visionTargets.get(0); // 0 is the skystone label
-        target.setName("Skystone Target");
-        target.setLocation(createMatrix(0, 0, stoneZ, 90, 0, 0));
-
-        // Next, translate the camera lens to where it is on the robot.
-        // In this example, it is centered (left to right), but forward of the middle of the robot, and above ground level.
-        final float CAMERA_FORWARD_DISPLACEMENT  = 4.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot center
-        final float CAMERA_VERTICAL_DISPLACEMENT = 8.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
-        final float CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
-
-//        OpenGLMatrix robotFromCamera = OpenGLMatrix
-//                .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
-//                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, -90, 0, 90));
-
-        OpenGLMatrix robotFromCamera = OpenGLMatrix
-                .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, -90, 0, 0));
-        // Setup listener and inform it of phone information
-        listener = (VuforiaTrackableDefaultListener) target.getListener();
-        listener.setPhoneInformation(robotFromCamera, parameters.cameraDirection);
+    public static int getValMid() {
+        return valMid;
     }
 
-    // Creates a matrix for determining the locations and orientations of objects
-    // Units are millimeters for x, y, and z, and degrees for u, v, and w
-    private OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w)
-    {
-        return OpenGLMatrix.translation(x, y, z).
-                multiplied(Orientation.getRotationMatrix(
-                        AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES, u, v, w));
+    public static int getValLeft() {
+        return valLeft;
+    }
+
+    public static int getValRight() {
+        return valRight;
+    }
+
+    public void update() {
     }
 }

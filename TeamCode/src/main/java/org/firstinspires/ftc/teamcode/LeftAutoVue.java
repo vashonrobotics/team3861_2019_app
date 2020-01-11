@@ -22,8 +22,8 @@ public class LeftAutoVue extends LinearOpMode {
 
     public void runOpMode() throws InterruptedException {
         SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
-        vue = new SkystoneTracker(.25);
-        vue.init();
+        vue = new SkystoneTracker();
+        //vue.init();
         RobotLog.d("After VF init");
         grabServo = hardwareMap.get(Servo.class, "thehandofnod");
         armMotor = hardwareMap.get(DcMotor.class, "thestrengthofnod");
@@ -37,23 +37,19 @@ public class LeftAutoVue extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
         drive.setPoseEstimate(new Pose2d(-46, -63, Math.PI / 2));
-        vue.update();
+       // vue.update();
         sleep(250);
         grabServo.setPosition(.1);
-        vue.update();
+       // vue.update();
         drive.followTrajectorySync(
                 drive.trajectoryBuilder().forward(9).build());
-        vue.update();
-        vue.update();
-        vue.update();
-        vue.update();
-        sleep(1500);
+               sleep(1500);
         drive.followTrajectorySync(
                 drive.trajectoryBuilder().forward(3).build());
 
-        vue.update();
+      //  vue.update();
         sleep(250);
-        vue.update();
+      //  vue.update();
 
             if (vue.isVisible()) {
                 armMotor.setTargetPosition(2800);

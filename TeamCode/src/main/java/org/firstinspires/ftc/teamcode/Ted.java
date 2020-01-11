@@ -23,8 +23,8 @@ public class Ted extends LinearOpMode {
 
     public void runOpMode() throws InterruptedException {
         SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
-        vue = new SkystoneTracker(.25);
-        vue.init();
+        vue = new SkystoneTracker();
+        vue.init(hardwareMap);
         RobotLog.d("After VF init");
         grabServo = hardwareMap.get(Servo.class, "thehandofnod");
         armMotor = hardwareMap.get(DcMotor.class, "thestrengthofnod");

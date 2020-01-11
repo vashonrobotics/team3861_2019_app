@@ -7,10 +7,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class VueTester extends LinearOpMode {
     SkystoneTracker vue;
     public void runOpMode()throws InterruptedException{
-        vue=new SkystoneTracker(.25);
-        vue.init();
+        vue=new SkystoneTracker();
+        vue.init(hardwareMap);
         while(true){
             vue.update();
+            telemetry.addLine(String.format("%d %d %d", SkystoneTracker.getValLeft(),
+                    SkystoneTracker.getValMid(), SkystoneTracker.getValRight()));
             if(vue.isVisible()){
                 telemetry.addData("isVisible",1);
             }else{

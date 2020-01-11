@@ -95,7 +95,7 @@ public class Teleop extends LinearOpMode {
             float triggerValue = gamepad1.right_trigger;
             telemetry.addLine(String.format("trigger value = %f", triggerValue));
             rotationScale *= Math.min(1.05 - triggerValue, 1.0);
-            velocityScale *= Math.min(1.25 - triggerValue, 1.0);
+            velocityScale *= Math.min(1.50 - triggerValue, 1.0);
 
             if (gamepad2.right_trigger > 0.5) {
                 armScale *= .5;
@@ -103,9 +103,9 @@ public class Teleop extends LinearOpMode {
 
             telemetry.addLine(String.format("rScale = %f, vScale = %f", rotationScale, velocityScale));
             drive.setDrivePower(new Pose2d(
-                    velocityScale * gamepad1.left_stick_y,
-                    velocityScale * gamepad1.left_stick_x,
-                    rotationScale * gamepad1.right_stick_x));
+                    velocityScale * 0.8 * gamepad1.left_stick_y,
+                    velocityScale * 0.8 * gamepad1.left_stick_x,
+                    rotationScale *.12* gamepad1.right_stick_x));
 
             if (gamepad2.right_bumper) {
                 grabServo.setPosition(.5);
